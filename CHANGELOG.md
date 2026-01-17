@@ -8,22 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-01-17
 
 ### Added
+
 - **Seller's Choice Auction System**: Sellers manually accept/reject bids
 - **User Authentication**: NextAuth.js with email/password
 - **Listing Management**: Create, edit, delete listings with image upload
 - **Bidding System**: Place bids with real-time updates
-- **Notification System**: 
+- **Notification System**:
   - Bid placed notifications for sellers
   - Bid accepted/rejected notifications for bidders
   - New message notifications
   - Unread count badges
   - Mark as read and clear all functionality
-- **Messaging System**: 
+- **Messaging System**:
   - Direct chat between buyers and sellers
   - Conversation threads linked to listings
   - Role badges (Buyer/Seller)
   - Unread message indicators
-- **Wishlist Feature**: 
+- **Wishlist Feature**:
   - Database-backed wishlist
   - Add/remove items
   - Persistent across sessions
@@ -34,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Messages inbox
   - Wishlist view
   - Settings page
-- **Search & Filters**: 
+- **Search & Filters**:
   - Search by title/description
   - Filter by category, condition, location
   - Sort by price, date
@@ -44,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Social Links**: GitHub, LinkedIn, Twitter, Facebook, Email
 
 ### Features
+
 - Landing page with hero, stats, how-it-works, categories, CTA
 - Browse listings page with advanced filters
 - Listing detail page with bid history
@@ -53,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Browser autocomplete for login credentials
 
 ### Technical
+
 - Next.js 16.1.3 with App Router and Turbopack
 - React 19
 - MongoDB Atlas for database
@@ -63,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SweetAlert2 for notifications
 
 ### Security
+
 - Password hashing with bcryptjs
 - JWT-based sessions
 - Protected API routes
@@ -73,6 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-01-01
 
 ### Added
+
 - Initial project setup
 - Basic structure and configuration
 - Core dependencies installation

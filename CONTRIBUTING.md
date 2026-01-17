@@ -76,6 +76,7 @@ pnpm dev
 - Reference issues and PRs when relevant
 
 Example:
+
 ```
 Add notification badge to navbar
 
@@ -103,6 +104,7 @@ Add notification badge to navbar
 ## Questions?
 
 Feel free to reach out:
+
 - Open an issue for discussion
 - Email: abbasyasin5n2@gmail.com
 - Twitter: [@bankai_tenshou](https://x.com/bankai_tenshou)

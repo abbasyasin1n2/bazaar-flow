@@ -15,6 +15,7 @@ BazaarFlow revolutionizes online trading by giving sellers full control - list y
 ## ✨ Features
 
 ### 🎯 Core Functionality
+
 - **Seller's Choice Auction**: Sellers manually review and accept bids - no automatic winner
 - **Smart Bidding System**: Place bids with real-time updates and notifications
 - **Real-time Messaging**: Built-in chat system between buyers and sellers
@@ -23,12 +24,14 @@ BazaarFlow revolutionizes online trading by giving sellers full control - list y
 - **Responsive Dashboard**: Comprehensive seller and buyer dashboards
 
 ### 🔔 Notifications
+
 - Real-time notifications for bids, messages, and sales
 - Unread count badges on bell icon
 - Notification types: bids, bid acceptance/rejection, messages, sales
 - Mark as read and clear all functionality
 
 ### 🎨 UI/UX
+
 - Modern, clean design with shadcn/ui components
 - Dark/Light theme support
 - Smooth animations with Motion
@@ -36,6 +39,7 @@ BazaarFlow revolutionizes online trading by giving sellers full control - list y
 - Image optimization with Next.js Image
 
 ### 🔐 Authentication & Security
+
 - NextAuth.js integration with JWT sessions
 - Email/password authentication
 - Protected routes and API endpoints
@@ -47,7 +51,7 @@ BazaarFlow revolutionizes online trading by giving sellers full control - list y
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - pnpm (or npm/yarn)
 - MongoDB Atlas account
 - Cloudinary account
@@ -55,12 +59,14 @@ BazaarFlow revolutionizes online trading by giving sellers full control - list y
 ### Installation
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/abbasyasin1n2/bazaar-flow.git
 cd bazaar-flow
 ```
 
 2. **Install dependencies**
+
 ```bash
 pnpm install
 ```
@@ -84,6 +90,7 @@ NEXTAUTH_SECRET=your_secret_key_here
 ```
 
 4. **Run the development server**
+
 ```bash
 pnpm dev
 ```
@@ -126,12 +133,14 @@ bazaar-flow/
 ## 🎯 How It Works
 
 ### For Sellers
+
 1. **List Your Item**: Create a listing with photos, description, and minimum price
 2. **Receive Bids**: Get notified when buyers place bids
 3. **Review & Choose**: Manually review all bids and select the winner
 4. **Complete Sale**: Connect with the buyer and finalize the transaction
 
 ### For Buyers
+
 1. **Browse Listings**: Explore items across multiple categories
 2. **Place Bids**: Submit your offer on items you want
 3. **Get Notified**: Receive updates on bid status
@@ -142,6 +151,7 @@ bazaar-flow/
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Next.js 16.1.3** - React framework with App Router and Turbopack
 - **React 19** - UI library
 - **Tailwind CSS v4** - Utility-first CSS framework
@@ -150,11 +160,13 @@ bazaar-flow/
 - **Lucide React** - Icon library
 
 ### Backend
+
 - **MongoDB Atlas** - Cloud database
 - **NextAuth.js v4** - Authentication
 - **Cloudinary** - Image hosting and optimization
 
 ### Development Tools
+
 - **pnpm** - Fast package manager
 - **ESLint** - Code linting
 - **PostCSS** - CSS processing
@@ -166,6 +178,7 @@ bazaar-flow/
 ### Collections
 
 **users**
+
 ```javascript
 {
   _id: ObjectId,
@@ -177,6 +190,7 @@ bazaar-flow/
 ```
 
 **listings**
+
 ```javascript
 {
   _id: ObjectId,
@@ -197,6 +211,7 @@ bazaar-flow/
 ```
 
 **bids**
+
 ```javascript
 {
   _id: ObjectId,
@@ -210,6 +225,7 @@ bazaar-flow/
 ```
 
 **notifications**
+
 ```javascript
 {
   _id: ObjectId,
@@ -228,17 +244,20 @@ bazaar-flow/
 ## 🔑 Key Features Explained
 
 ### Notification System
+
 - **Trigger Events**: Bid placed, bid accepted/rejected, new messages
 - **Real-time Updates**: Unread count badge, dropdown preview
 - **Persistent Storage**: MongoDB-backed with API endpoints
 - **User Actions**: Mark as read, clear all notifications
 
 ### Wishlist System
+
 - **Database-backed**: Survives browser refresh
 - **API Integration**: RESTful endpoints for CRUD operations
 - **Quick Access**: Save items for later viewing
 
 ### Messaging System
+
 - **Direct Communication**: Buyers and sellers can chat
 - **Listing Context**: Messages linked to specific items
 - **Role Badges**: Clear indication of Buyer/Seller roles
@@ -249,10 +268,12 @@ bazaar-flow/
 ## 🌐 API Routes
 
 ### Authentication
+
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/[...nextauth]` - NextAuth endpoints
 
 ### Listings
+
 - `GET /api/listings` - Get all listings (with filters)
 - `POST /api/listings` - Create new listing
 - `GET /api/listings/[id]` - Get single listing
@@ -260,21 +281,25 @@ bazaar-flow/
 - `DELETE /api/listings/[id]` - Delete listing
 
 ### Bids
+
 - `GET /api/bids` - Get user's bids
 - `POST /api/bids` - Place a bid
 - `PATCH /api/bids/[id]` - Accept/reject bid
 
 ### Notifications
+
 - `GET /api/notifications` - Get user notifications
 - `PATCH /api/notifications` - Mark as read
 - `DELETE /api/notifications` - Clear all
 
 ### Wishlist
+
 - `GET /api/wishlist` - Get user wishlist
 - `POST /api/wishlist` - Add to wishlist
 - `DELETE /api/wishlist` - Remove from wishlist
 
 ### Conversations
+
 - `GET /api/conversations` - Get user conversations
 - `POST /api/conversations` - Create conversation
 - `GET /api/conversations/[id]` - Get messages
@@ -285,6 +310,7 @@ bazaar-flow/
 ## 🎨 Customization
 
 ### Theme Colors
+
 Edit `tailwind.config.js` to customize colors:
 
 ```javascript
@@ -299,6 +325,7 @@ theme: {
 ```
 
 ### Categories
+
 Update categories in `src/lib/constants.js`:
 
 ```javascript
@@ -324,6 +351,7 @@ export const CATEGORIES = [
 ### Environment Variables for Production
 
 Make sure to set all environment variables in your hosting platform:
+
 - `MONGODB_URI`
 - `CLOUDINARY_CLOUD_NAME`
 - `CLOUDINARY_API_KEY`
@@ -364,6 +392,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 📞 Support
 
 If you have any questions or need help, feel free to:
+
 - Open an issue on GitHub
 - Send me an email
 - Connect on LinkedIn
