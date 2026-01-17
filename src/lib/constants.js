@@ -41,11 +41,11 @@ export const ITEMS_PER_PAGE = 12;
 export const MAX_IMAGES_PER_LISTING = 5;
 export const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
-// Currency formatting
+// Currency formatting (Bangladeshi Taka)
 export const formatCurrency = (amount) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+  return "৳" + new Intl.NumberFormat("en-BD", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(amount);
 };
 
