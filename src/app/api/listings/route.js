@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { getCollection } from "@/lib/db";
 import { ITEMS_PER_PAGE, LISTING_STATUS } from "@/lib/constants";
 
@@ -10,13 +12,24 @@ export async function GET(request) {
     const category = searchParams.get("category");
     const search = searchParams.get("search");
     const sort = searchParams.get("sort") || "newest";
+    const sellerId = searchParams.get("sellerId");
+    const status = searchParams.get("status");
 
     const listingsCollection = await getCollection("listings");
 
     // Build query
-    const query = {
-      status: LISTING_STATUS.ACTIVE,
-    };
+    const query = {};
+
+    // If sellerId provided, show all statuses for that seller
+    // Otherwise, only show active listings (public)
+    if (sellerId) {
+      query.sellerId = sellerId;
+      if (status && status !== "all") {
+        query.status = status;
+      }
+    } else {
+      query.status = LISTING_STATUS.ACTIVE;
+    }
 
     if (category && category !== "all") {
       query.category = category;
@@ -92,6 +105,102 @@ export async function GET(request) {
     console.error("Get listings error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch listings" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json(
+        { success: false, error: "Please sign in to create a listing" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { title, description, category, startingPrice, buyNowPrice, images } = body;
+
+    // Validation
+    if (!title || title.length < 10) {
+      return NextResponse.json(
+        { success: false, error: "Title must be at least 10 characters" },
+        { status: 400 }
+      );
+    }
+
+    if (!description || description.length < 30) {
+      return NextResponse.json(
+        { success: false, error: "Description must be at least 30 characters" },
+        { status: 400 }
+      );
+    }
+
+    if (!category) {
+      return NextResponse.json(
+        { success: false, error: "Category is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!startingPrice || startingPrice < 1) {
+      return NextResponse.json(
+        { success: false, error: "Starting price must be at least ৳1" },
+        { status: 400 }
+      );
+    }
+
+    if (!images || images.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "At least one image is required" },
+        { status: 400 }
+      );
+    }
+
+    if (buyNowPrice && buyNowPrice <= startingPrice) {
+      return NextResponse.json(
+        { success: false, error: "Buy Now price must be higher than starting price" },
+        { status: 400 }
+      );
+    }
+
+    const listingsCollection = await getCollection("listings");
+
+    const listing = {
+      title,
+      description,
+      category,
+      startingPrice: parseFloat(startingPrice),
+      buyNowPrice: buyNowPrice ? parseFloat(buyNowPrice) : null,
+      currentBid: null,
+      bidCount: 0,
+      images,
+      sellerId: session.user.id,
+      sellerName: session.user.name,
+      sellerEmail: session.user.email,
+      status: LISTING_STATUS.ACTIVE,
+      views: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const result = await listingsCollection.insertOne(listing);
+
+    return NextResponse.json({
+      success: true,
+      message: "Listing created successfully",
+      listing: {
+        ...listing,
+        _id: result.insertedId.toString(),
+      },
+    });
+  } catch (error) {
+    console.error("Create listing error:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to create listing" },
       { status: 500 }
     );
   }

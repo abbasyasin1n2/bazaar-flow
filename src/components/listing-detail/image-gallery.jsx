@@ -11,9 +11,10 @@ export function ImageGallery({ images = [], title = "" }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Fallback image if none provided
-  const displayImages = images.length > 0 
-    ? images 
+  // Filter out invalid images and provide fallback
+  const validImages = images.filter((img) => img?.url);
+  const displayImages = validImages.length > 0 
+    ? validImages 
     : [{ url: "https://images.unsplash.com/photo-1560472355-536de3962603?w=800" }];
 
   const handlePrevious = () => {
@@ -32,13 +33,19 @@ export function ImageGallery({ images = [], title = "" }) {
     <div className="space-y-4">
       {/* Main Image */}
       <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-muted group">
-        <Image
-          src={displayImages[currentIndex]?.url}
-          alt={`${title} - Image ${currentIndex + 1}`}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          priority
-        />
+        {displayImages[currentIndex]?.url ? (
+          <Image
+            src={displayImages[currentIndex].url}
+            alt={`${title} - Image ${currentIndex + 1}`}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            priority
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            No image available
+          </div>
+        )}
         
         {/* Navigation Arrows */}
         {displayImages.length > 1 && (

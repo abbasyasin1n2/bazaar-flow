@@ -27,7 +27,7 @@ export function ListingCard({ listing }) {
   } = listing;
 
   const displayPrice = currentBid || startingPrice;
-  const hasImage = images && images.length > 0;
+  const hasImage = images && images.length > 0 && images[0]?.url;
 
   return (
     <motion.div

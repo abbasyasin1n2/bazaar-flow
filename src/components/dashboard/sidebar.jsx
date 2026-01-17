@@ -42,9 +42,14 @@ const sidebarLinks = [
   },
   {
     title: "My Listings",
-    href: "/dashboard/listings",
+    href: "/dashboard/my-listings",
     icon: Package,
     badge: null,
+  },
+  {
+    title: "Create Listing",
+    href: "/dashboard/create-listing",
+    icon: PlusCircle,
   },
   {
     title: "My Bids",
