@@ -1,6 +1,26 @@
 {
   "name": "bazaar-flow",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "A modern marketplace platform for Bangladesh with seller's choice auction model",
+  "author": {
+    "name": "Abbas Yasin",
+    "email": "abbasyasin5n2@gmail.com",
+    "url": "https://github.com/abbasyasin1n2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abbasyasin1n2/bazaar-flow.git"
+  },
+  "keywords": [
+    "marketplace",
+    "auction",
+    "nextjs",
+    "mongodb",
+    "bangladesh",
+    "e-commerce",
+    "bidding"
+  ],
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev",

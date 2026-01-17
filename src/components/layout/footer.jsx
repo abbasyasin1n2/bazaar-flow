@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShoppingBag, Github, Twitter, Mail } from "lucide-react";
+import { ShoppingBag, Github, Twitter, Mail, Linkedin, Facebook } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const footerLinks = {
@@ -37,21 +37,39 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-3">
               <Link 
-                href="https://twitter.com" 
+                href="https://x.com/bankai_tenshou" 
                 target="_blank"
+                rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Twitter className="h-5 w-5" />
               </Link>
               <Link 
-                href="https://github.com" 
+                href="https://github.com/abbasyasin1n2" 
                 target="_blank"
+                rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Github className="h-5 w-5" />
               </Link>
               <Link 
-                href="mailto:hello@bazaarflow.com"
+                href="https://www.linkedin.com/in/abbas-yasin-789452392/" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Linkedin className="h-5 w-5" />
+              </Link>
+              <Link 
+                href="https://www.facebook.com/abbas.yasin.7" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Facebook className="h-5 w-5" />
+              </Link>
+              <Link 
+                href="mailto:abbasyasin5n2@gmail.com"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Mail className="h-5 w-5" />
