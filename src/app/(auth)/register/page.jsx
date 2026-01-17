@@ -120,6 +120,7 @@ export default function RegisterPage() {
                   placeholder="John Doe"
                   value={formData.name}
                   onChange={handleChange}
+                  autoComplete="name"
                   required
                   disabled={isLoading}
                   minLength={2}
@@ -135,6 +136,7 @@ export default function RegisterPage() {
                   placeholder="you@example.com"
                   value={formData.email}
                   onChange={handleChange}
+                  autoComplete="email"
                   required
                   disabled={isLoading}
                 />
@@ -150,6 +152,7 @@ export default function RegisterPage() {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleChange}
+                    autoComplete="new-password"
                     required
                     disabled={isLoading}
                     minLength={6}
@@ -180,6 +183,7 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  autoComplete="new-password"
                   required
                   disabled={isLoading}
                   minLength={6}
