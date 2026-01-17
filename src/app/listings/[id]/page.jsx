@@ -13,8 +13,32 @@ import {
   Share2, 
   Heart,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Laptop,
+  Shirt,
+  Home,
+  Car,
+  Palette,
+  Dumbbell,
+  BookOpen,
+  Gamepad2,
+  Gem,
+  Package,
 } from "lucide-react";
+
+// Map icon names to components
+const iconMap = {
+  Laptop,
+  Shirt,
+  Home,
+  Car,
+  Palette,
+  Dumbbell,
+  BookOpen,
+  Gamepad2,
+  Gem,
+  Package,
+};
 import { motion } from "motion/react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -75,14 +99,51 @@ function ListingDetailContent({ id }) {
     }
   };
 
-  const handleWishlist = () => {
-    setIsWishlisted(!isWishlisted);
-    showSuccess(
-      isWishlisted ? "Removed from Wishlist" : "Added to Wishlist",
-      isWishlisted 
-        ? "This item has been removed from your wishlist" 
-        : "You'll be notified about updates to this listing"
-    );
+  const handleWishlist = async () => {
+    if (!session) {
+      showSuccess(
+        "Sign in Required",
+        "Please sign in to add items to your wishlist"
+      );
+      return;
+    }
+
+    try {
+      if (isWishlisted) {
+        // Remove from wishlist
+        const response = await fetch(`/api/wishlist?listingId=${listing._id}`, {
+          method: "DELETE",
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          setIsWishlisted(false);
+          showSuccess(
+            "Removed from Wishlist",
+            "This item has been removed from your wishlist"
+          );
+        }
+      } else {
+        // Add to wishlist
+        const response = await fetch("/api/wishlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ listingId: listing._id }),
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          setIsWishlisted(true);
+          showSuccess(
+            "Added to Wishlist",
+            "You'll be notified about updates to this listing"
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Wishlist error:", error);
+      showSuccess("Error", "Failed to update wishlist");
+    }
   };
 
   const handleBidPlaced = (newBid) => {
@@ -179,7 +240,10 @@ function ListingDetailContent({ id }) {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="flex items-center gap-1">
-                {category?.icon && <span>{category.icon}</span>}
+                {category?.icon && (() => {
+                  const IconComponent = iconMap[category.icon] || Package;
+                  return <IconComponent className="h-3 w-3" />;
+                })()}
                 {category?.label || listing.category}
               </Badge>
               {isActive && (

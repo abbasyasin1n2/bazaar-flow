@@ -7,9 +7,9 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatCurrency, timeAgo } from "@/lib/constants";
+import { formatCurrency, timeAgo, LISTING_STATUS } from "@/lib/constants";
 import { truncateText } from "@/lib/utils";
-import { Gavel, ShoppingCart, ImageIcon, Eye } from "lucide-react";
+import { Gavel, ShoppingCart, ImageIcon, Eye, CheckCircle } from "lucide-react";
 
 export function ListingCard({ listing }) {
   const {
@@ -24,10 +24,12 @@ export function ListingCard({ listing }) {
     images,
     sellerName,
     createdAt,
+    status,
   } = listing;
 
   const displayPrice = currentBid || startingPrice;
   const hasImage = images && images.length > 0 && images[0]?.url;
+  const isSold = status === LISTING_STATUS.SOLD;
 
   return (
     <motion.div
@@ -37,7 +39,7 @@ export function ListingCard({ listing }) {
       transition={{ duration: 0.3 }}
     >
       <Link href={`/listings/${_id}`}>
-        <Card className="h-full overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className={`h-full overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow ${isSold ? 'opacity-80' : ''}`}>
           {/* Image */}
           <div className="relative aspect-[4/3] bg-muted overflow-hidden">
             {hasImage ? (
@@ -45,7 +47,8 @@ export function ListingCard({ listing }) {
                 src={images[0].url}
                 alt={title}
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className={`object-cover group-hover:scale-105 transition-transform duration-300 ${isSold ? 'grayscale-[30%]' : ''}`}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
@@ -53,16 +56,28 @@ export function ListingCard({ listing }) {
               </div>
             )}
             
+            {/* SOLD Badge - Priority Display */}
+            {isSold && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <Badge className="bg-red-600 hover:bg-red-700 text-white text-lg py-2 px-4">
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  SOLD
+                </Badge>
+              </div>
+            )}
+            
             {/* Category Badge */}
-            <Badge 
-              variant="secondary" 
-              className="absolute top-3 left-3 bg-background/80 backdrop-blur-sm"
-            >
-              {category}
-            </Badge>
+            {!isSold && (
+              <Badge 
+                variant="secondary" 
+                className="absolute top-3 left-3 bg-background/80 backdrop-blur-sm"
+              >
+                {category}
+              </Badge>
+            )}
 
             {/* Buy Now Badge */}
-            {buyNowPrice && (
+            {buyNowPrice && !isSold && (
               <Badge 
                 className="absolute top-3 right-3 bg-green-500 hover:bg-green-600"
               >
@@ -102,10 +117,19 @@ export function ListingCard({ listing }) {
           </CardContent>
 
           <CardFooter className="px-4 py-3 border-t bg-muted/30 flex items-center justify-between">
-            {/* Bid Count */}
+            {/* Bid Count or SOLD */}
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Gavel className="h-4 w-4" />
-              <span>{bidCount} {bidCount === 1 ? "bid" : "bids"}</span>
+              {isSold ? (
+                <>
+                  <CheckCircle className="h-4 w-4 text-red-500" />
+                  <span className="text-red-500 font-medium">Sold</span>
+                </>
+              ) : (
+                <>
+                  <Gavel className="h-4 w-4" />
+                  <span>{bidCount} {bidCount === 1 ? "bid" : "bids"}</span>
+                </>
+              )}
             </div>
 
             {/* Time */}

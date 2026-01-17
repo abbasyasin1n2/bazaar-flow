@@ -15,6 +15,7 @@ import {
   Package,
   Filter,
   MoreHorizontal,
+  MessageSquare,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -133,13 +134,27 @@ export default function MyListingsPage() {
     }
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (listing) => {
+    const status = listing.status;
     const variants = {
       [LISTING_STATUS.ACTIVE]: "default",
       [LISTING_STATUS.PENDING]: "secondary",
       [LISTING_STATUS.SOLD]: "success",
       [LISTING_STATUS.CLOSED]: "destructive",
     };
+
+    // Show sold type if sold
+    if (status === LISTING_STATUS.SOLD) {
+      const soldType = listing.soldType;
+      return (
+        <div className="flex flex-col gap-1">
+          <Badge variant="success">Sold</Badge>
+          <Badge variant="outline" className="text-xs">
+            {soldType === "buy_now" || soldType === "buy-now" ? "Buy Now" : "Auction"}
+          </Badge>
+        </div>
+      );
+    }
 
     const labels = {
       [LISTING_STATUS.ACTIVE]: "Active",
@@ -269,6 +284,7 @@ export default function MyListingsPage() {
                                   src={listing.images[0].url}
                                   alt={listing.title}
                                   fill
+                                  sizes="48px"
                                   className="object-cover"
                                 />
                               ) : (
@@ -300,7 +316,7 @@ export default function MyListingsPage() {
                         <TableCell>
                           <Badge variant="outline">{listing.bidCount || 0}</Badge>
                         </TableCell>
-                        <TableCell>{getStatusBadge(listing.status)}</TableCell>
+                        <TableCell>{getStatusBadge(listing)}</TableCell>
                         <TableCell className="text-muted-foreground">
                           {new Date(listing.createdAt).toLocaleDateString()}
                         </TableCell>
@@ -318,6 +334,14 @@ export default function MyListingsPage() {
                                   View
                                 </Link>
                               </DropdownMenuItem>
+                              {listing.status === LISTING_STATUS.SOLD && listing.soldTo && (
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/dashboard/messages?listingId=${listing._id}&recipientId=${listing.soldTo}`}>
+                                    <MessageSquare className="h-4 w-4 mr-2" />
+                                    Contact Buyer
+                                  </Link>
+                                </DropdownMenuItem>
+                              )}
                               {listing.status !== LISTING_STATUS.SOLD && (
                                 <>
                                   <DropdownMenuItem asChild>

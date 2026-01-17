@@ -116,7 +116,7 @@ export function ListingsFilter({ onFilterChange }) {
             <SelectItem value="all">All Categories</SelectItem>
             {CATEGORIES.map((cat) => (
               <SelectItem key={cat.value} value={cat.value}>
-                {cat.icon} {cat.label}
+                {cat.label}
               </SelectItem>
             ))}
           </SelectContent>

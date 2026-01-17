@@ -43,7 +43,7 @@ export function BuyNowCard({ listing }) {
     setIsProcessing(true);
 
     try {
-      const response = await fetch("/api/listings/buy-now", {
+      const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ listingId: listing._id }),
@@ -57,7 +57,7 @@ export function BuyNowCard({ listing }) {
 
       showSuccess(
         "Purchase Complete!",
-        "Congratulations! The seller will be notified to complete the transaction."
+        "Congratulations! The item is now yours. Contact the seller to arrange delivery."
       );
 
       router.refresh();

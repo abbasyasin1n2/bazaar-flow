@@ -4,7 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cn } from "@/lib/utils";
 
 export function ImageGallery({ images = [], title = "" }) {
@@ -104,8 +105,7 @@ export function ImageGallery({ images = [], title = "" }) {
               <Image
                 src={image.url}
                 alt={`${title} - Thumbnail ${index + 1}`}
-                fill
-                className="object-cover"
+                fill                sizes="100px"                className="object-cover"
               />
             </button>
           ))}
@@ -115,6 +115,9 @@ export function ImageGallery({ images = [], title = "" }) {
       {/* Fullscreen Dialog */}
       <Dialog open={isFullscreen} onOpenChange={setIsFullscreen}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 border-0 bg-black/95">
+          <VisuallyHidden>
+            <DialogTitle>{title} - Fullscreen View</DialogTitle>
+          </VisuallyHidden>
           <div className="relative w-full h-[90vh]">
             <Image
               src={displayImages[currentIndex]?.url}

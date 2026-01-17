@@ -91,6 +91,7 @@ export function RecentListingsTable({ listings = [] }) {
                           src={listing.images[0].url}
                           alt={listing.title}
                           fill
+                          sizes="48px"
                           className="object-cover"
                         />
                       )}
@@ -217,6 +218,7 @@ export function RecentBidsTable({ bids = [] }) {
                           src={bid.listingImage}
                           alt={bid.listingTitle}
                           fill
+                          sizes="40px"
                           className="object-cover"
                         />
                       )}

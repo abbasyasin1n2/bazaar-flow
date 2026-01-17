@@ -21,14 +21,15 @@ export async function GET(request) {
     const query = {};
 
     // If sellerId provided, show all statuses for that seller
-    // Otherwise, only show active listings (public)
+    // Otherwise, show active and sold listings (public can see sold items too)
     if (sellerId) {
       query.sellerId = sellerId;
       if (status && status !== "all") {
         query.status = status;
       }
     } else {
-      query.status = LISTING_STATUS.ACTIVE;
+      // Public listings: show active and sold (not closed or draft)
+      query.status = { $in: [LISTING_STATUS.ACTIVE, LISTING_STATUS.SOLD] };
     }
 
     if (category && category !== "all") {
@@ -87,6 +88,10 @@ export async function GET(request) {
       sellerId: listing.sellerId,
       sellerName: listing.sellerName,
       status: listing.status,
+      soldTo: listing.soldTo,
+      soldToName: listing.soldToName,
+      soldPrice: listing.soldPrice,
+      soldType: listing.soldType,
       createdAt: listing.createdAt,
     }));
 

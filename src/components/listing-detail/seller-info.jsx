@@ -1,15 +1,24 @@
 "use client";
 
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { User, Star, Calendar, MessageCircle, Shield, BadgeCheck } from "lucide-react";
+import { User, Star, Calendar, MessageCircle, Shield, BadgeCheck, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 export function SellerInfo({ seller = {}, listingId }) {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [startingChat, setStartingChat] = useState(false);
+  
   const {
+    id: sellerId,
     name = "Unknown Seller",
     avatar,
     rating = 0,
@@ -18,6 +27,46 @@ export function SellerInfo({ seller = {}, listingId }) {
     totalSales = 0,
     verified = false,
   } = seller;
+
+  const isOwnListing = session?.user?.id === sellerId;
+
+  const handleStartConversation = async () => {
+    if (!session) {
+      router.push("/login");
+      return;
+    }
+
+    if (isOwnListing) {
+      toast.error("You cannot message yourself");
+      return;
+    }
+
+    setStartingChat(true);
+
+    try {
+      const response = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipientId: sellerId,
+          listingId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        router.push(`/dashboard/messages?listingId=${listingId}`);
+      } else {
+        toast.error(data.error || "Failed to start conversation");
+      }
+    } catch (error) {
+      console.error("Start conversation error:", error);
+      toast.error("Failed to start conversation");
+    } finally {
+      setStartingChat(false);
+    }
+  };
 
   const ratingPercentage = (rating / 5) * 100;
 
@@ -96,12 +145,21 @@ export function SellerInfo({ seller = {}, listingId }) {
               View Profile
             </Link>
           </Button>
-          <Button variant="default" className="flex-1" asChild>
-            <Link href={`/messages/new?listing=${listingId}`}>
-              <MessageCircle className="h-4 w-4 mr-2" />
+          {!isOwnListing && (
+            <Button 
+              variant="default" 
+              className="flex-1" 
+              onClick={handleStartConversation}
+              disabled={startingChat}
+            >
+              {startingChat ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <MessageCircle className="h-4 w-4 mr-2" />
+              )}
               Message
-            </Link>
-          </Button>
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

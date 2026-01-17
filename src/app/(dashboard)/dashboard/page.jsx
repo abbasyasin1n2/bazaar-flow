@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Package, Gavel, DollarSign, Eye, PlusCircle, Loader2 } from "lucide-react";
+import { Package, Gavel, DollarSign, Eye, PlusCircle, Loader2, ShoppingBag, TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
 import {
   StatsCard,
@@ -15,6 +15,7 @@ import {
 } from "@/components/dashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/constants";
 
 function EmptyState({ title, description, actionLabel, actionHref }) {
@@ -34,6 +35,51 @@ function EmptyState({ title, description, actionLabel, actionHref }) {
             </Link>
           </Button>
         )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function RecentOrdersCard({ title, icon: Icon, orders, type }) {
+  if (!orders || orders.length === 0) {
+    return null;
+  }
+  
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <Icon className="h-5 w-5 text-primary" />
+          <CardTitle className="text-lg">{title}</CardTitle>
+        </div>
+        <CardDescription>
+          {type === "purchases" ? "Items you've bought" : "Items you've sold"}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {orders.map((order, index) => (
+            <div
+              key={order._id || index}
+              className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{order.listingTitle}</p>
+                <p className="text-sm text-muted-foreground">
+                  {type === "purchases" ? "Bought from" : "Sold to"}: {order.otherPartyName}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className={`font-semibold ${type === "sales" ? "text-green-600" : ""}`}>
+                  {type === "sales" ? "+" : ""}{formatCurrency(order.amount)}
+                </p>
+                <Badge variant={order.type === "buy_now" ? "secondary" : "outline"} className="text-xs">
+                  {order.type === "buy_now" ? "Buy Now" : "Auction"}
+                </Badge>
+              </div>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
@@ -75,11 +121,18 @@ export default function DashboardPage() {
     activeListings: 0,
     totalBidsReceived: 0,
     totalBidsPlaced: 0,
+    totalPurchases: 0,
+    totalSpent: 0,
   };
+
+  const recentPurchases = dashboardData?.recentPurchases || [];
+  const recentSales = dashboardData?.recentSales || [];
 
   const hasListings = stats.totalListings > 0;
   const hasBids = stats.totalBidsPlaced > 0;
-  const hasActivity = hasListings || hasBids;
+  const hasPurchases = stats.totalPurchases > 0;
+  const hasSales = stats.totalEarnings > 0 || recentSales.length > 0;
+  const hasActivity = hasListings || hasBids || hasPurchases || hasSales;
 
   return (
     <div className="space-y-6">
@@ -90,7 +143,7 @@ export default function DashboardPage() {
         className="flex flex-col gap-1"
       >
         <h2 className="text-2xl font-bold tracking-tight">
-          Welcome back, {session?.user?.name?.split(" ")[0] || "User"}! 👋
+          Welcome back, {session?.user?.name?.split(" ")[0] || "User"}!
         </h2>
         <p className="text-muted-foreground">
           {hasActivity 
@@ -104,7 +157,7 @@ export default function DashboardPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       >
         <StatsCard
           title="Total Earnings"
@@ -114,11 +167,25 @@ export default function DashboardPage() {
           description={stats.totalEarnings > 0 ? "from sales" : "no sales yet"}
         />
         <StatsCard
+          title="Total Spent"
+          value={formatCurrency(stats.totalSpent)}
+          icon={ShoppingBag}
+          trend={stats.totalSpent > 0 ? "up" : "neutral"}
+          description={`${stats.totalPurchases} purchase${stats.totalPurchases !== 1 ? "s" : ""}`}
+        />
+        <StatsCard
           title="Active Listings"
           value={stats.activeListings}
           icon={Package}
           trend={stats.activeListings > 0 ? "up" : "neutral"}
           description={stats.activeListings > 0 ? "live now" : "create your first"}
+        />
+        <StatsCard
+          title="Sold Items"
+          value={stats.soldListings || 0}
+          icon={TrendingUp}
+          trend={(stats.soldListings || 0) > 0 ? "up" : "neutral"}
+          description="items sold"
         />
         <StatsCard
           title="Bids Received"
@@ -216,6 +283,29 @@ export default function DashboardPage() {
               />
             )}
           </motion.div>
+
+          {/* Purchases and Sales Row */}
+          {(recentPurchases.length > 0 || recentSales.length > 0) && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="grid gap-4 lg:grid-cols-2"
+            >
+              <RecentOrdersCard
+                title="Recent Purchases"
+                icon={ShoppingBag}
+                orders={recentPurchases}
+                type="purchases"
+              />
+              <RecentOrdersCard
+                title="Recent Sales"
+                icon={TrendingUp}
+                orders={recentSales}
+                type="sales"
+              />
+            </motion.div>
+          )}
         </>
       )}
     </div>

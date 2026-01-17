@@ -3,7 +3,36 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { Loader2, ArrowLeft, Save, Eye } from "lucide-react";
+import { 
+  Loader2, 
+  ArrowLeft, 
+  Save, 
+  Eye,
+  Laptop,
+  Shirt,
+  Home,
+  Car,
+  Palette,
+  Dumbbell,
+  BookOpen,
+  Gamepad2,
+  Gem,
+  Package,
+} from "lucide-react";
+
+// Map icon names to components
+const iconMap = {
+  Laptop,
+  Shirt,
+  Home,
+  Car,
+  Palette,
+  Dumbbell,
+  BookOpen,
+  Gamepad2,
+  Gem,
+  Package,
+};
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -174,14 +203,17 @@ export default function CreateListingPage() {
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        <span className="flex items-center gap-2">
-                          <span>{category.icon}</span>
-                          <span>{category.label}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
+                    {CATEGORIES.map((category) => {
+                      const IconComponent = iconMap[category.icon] || Package;
+                      return (
+                        <SelectItem key={category.value} value={category.value}>
+                          <span className="flex items-center gap-2">
+                            <IconComponent className="h-4 w-4" />
+                            <span>{category.label}</span>
+                          </span>
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
                 <input

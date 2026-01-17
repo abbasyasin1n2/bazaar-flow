@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shared";
+import { useNotifications } from "@/hooks/useNotifications";
 import { 
   Menu, 
   X, 
@@ -13,7 +15,13 @@ import {
   User, 
   LogOut,
   LayoutDashboard,
-  Plus
+  Plus,
+  Home,
+  Bell,
+  Gavel,
+  MessageSquare,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -23,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { getInitials } from "@/lib/utils";
 
 const navLinks = [
@@ -31,8 +40,24 @@ const navLinks = [
   { href: "/#categories", label: "Categories" },
 ];
 
+const getNotificationIcon = (type) => {
+  switch (type) {
+    case "bid":
+      return <Gavel className="h-4 w-4" />;
+    case "message":
+      return <MessageSquare className="h-4 w-4" />;
+    case "accepted":
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case "rejected":
+      return <XCircle className="h-4 w-4 text-red-500" />;
+    default:
+      return <Bell className="h-4 w-4" />;
+  }
+};
+
 export function Navbar() {
   const { data: session, status } = useSession();
+  const { notifications, unreadCount, isLoading } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -69,14 +94,92 @@ export function Navbar() {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-3">
+          <Button asChild variant="ghost" size="icon">
+            <Link href="/">
+              <Home className="h-5 w-5" />
+            </Link>
+          </Button>
           <ThemeToggle />
+          
+          {session && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <div className="px-3 py-2 border-b">
+                  <p className="font-semibold">Notifications</p>
+                  <p className="text-xs text-muted-foreground">
+                    {unreadCount > 0 
+                      ? `You have ${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}`
+                      : "Stay updated with your activity"
+                    }
+                  </p>
+                </div>
+                <div className="max-h-[300px] overflow-y-auto p-2">
+                  {isLoading ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      Loading notifications...
+                    </p>
+                  ) : notifications.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No notifications yet
+                    </p>
+                  ) : (
+                    notifications.slice(0, 5).map((notification) => (
+                      <DropdownMenuItem
+                        key={notification._id}
+                        className={`flex gap-3 items-start p-3 cursor-pointer ${
+                          !notification.read ? "bg-primary/5" : ""
+                        }`}
+                        asChild
+                      >
+                        <Link href="/dashboard/notifications">
+                          <div className="mt-0.5">
+                            {getNotificationIcon(notification.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="font-medium text-sm">{notification.title}</p>
+                              {!notification.read && (
+                                <Badge variant="destructive" className="text-[10px] px-1 py-0">New</Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                            </p>
+                          </div>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href="/dashboard/notifications" className="text-center text-sm text-primary w-full">
+                    View all notifications
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           
           {status === "loading" ? (
             <div className="w-20 h-9 bg-muted animate-pulse rounded-md" />
           ) : session ? (
             <div className="flex items-center gap-3">
               <Button asChild variant="outline" size="sm">
-                <Link href="/create-listing">
+                <Link href="/dashboard/create-listing">
                   <Plus className="h-4 w-4 mr-1" />
                   Sell Item
                 </Link>
@@ -106,7 +209,7 @@ export function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/my-listings">
+                    <Link href="/dashboard/my-listings">
                       <ShoppingBag className="h-4 w-4 mr-2" />
                       My Listings
                     </Link>
@@ -175,7 +278,7 @@ export function Navbar() {
                       <Link href="/dashboard">Dashboard</Link>
                     </Button>
                     <Button asChild className="w-full">
-                      <Link href="/create-listing">Sell Item</Link>
+                      <Link href="/dashboard/create-listing">Sell Item</Link>
                     </Button>
                   </>
                 ) : (

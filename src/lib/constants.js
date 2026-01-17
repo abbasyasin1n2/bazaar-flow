@@ -1,15 +1,15 @@
-// Listing categories
+// Listing categories - icons are lucide-react icon names
 export const CATEGORIES = [
-  { value: "electronics", label: "Electronics", icon: "💻" },
-  { value: "fashion", label: "Fashion", icon: "👕" },
-  { value: "home-garden", label: "Home & Garden", icon: "🏠" },
-  { value: "vehicles", label: "Vehicles", icon: "🚗" },
-  { value: "collectibles", label: "Collectibles", icon: "🎨" },
-  { value: "sports", label: "Sports & Outdoors", icon: "⚽" },
-  { value: "books-media", label: "Books & Media", icon: "📚" },
-  { value: "toys-games", label: "Toys & Games", icon: "🎮" },
-  { value: "jewelry", label: "Jewelry & Watches", icon: "💎" },
-  { value: "other", label: "Other", icon: "📦" },
+  { value: "electronics", label: "Electronics", icon: "Laptop" },
+  { value: "fashion", label: "Fashion", icon: "Shirt" },
+  { value: "home-garden", label: "Home & Garden", icon: "Home" },
+  { value: "vehicles", label: "Vehicles", icon: "Car" },
+  { value: "collectibles", label: "Collectibles", icon: "Palette" },
+  { value: "sports", label: "Sports & Outdoors", icon: "Dumbbell" },
+  { value: "books-media", label: "Books & Media", icon: "BookOpen" },
+  { value: "toys-games", label: "Toys & Games", icon: "Gamepad2" },
+  { value: "jewelry", label: "Jewelry & Watches", icon: "Gem" },
+  { value: "other", label: "Other", icon: "Package" },
 ];
 
 // Listing status

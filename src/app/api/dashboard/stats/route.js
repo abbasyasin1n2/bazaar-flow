@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getCollection } from "@/lib/db";
+import { ObjectId } from "mongodb";
 
 export async function GET() {
   try {
@@ -34,11 +35,17 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .toArray();
 
-    // Calculate total earnings from sold items
-    const soldOrders = await ordersCollection
-      .find({ sellerId: userId, status: { $in: ["completed", "pending"] } })
+    // Calculate total earnings from sold items (as seller)
+    const salesOrders = await ordersCollection
+      .find({ sellerId: userId })
       .toArray();
-    const totalEarnings = soldOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+    const totalEarnings = salesOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+
+    // Get user's purchases (as buyer)
+    const purchaseOrders = await ordersCollection
+      .find({ buyerId: userId })
+      .sort({ createdAt: -1 })
+      .toArray();
 
     // Get recent listings (limit 5)
     const recentListings = await listingsCollection
@@ -57,9 +64,14 @@ export async function GET() {
     // Enrich bids with listing info
     const enrichedBids = await Promise.all(
       recentBids.map(async (bid) => {
-        const listing = await listingsCollection.findOne({ 
-          _id: { $toString: bid.listingId } 
-        });
+        let listing = null;
+        try {
+          listing = await listingsCollection.findOne({ 
+            _id: new ObjectId(bid.listingId)
+          });
+        } catch (e) {
+          // Invalid ObjectId
+        }
         return {
           ...bid,
           _id: bid._id.toString(),
@@ -76,6 +88,13 @@ export async function GET() {
       categoryStats[cat] = (categoryStats[cat] || 0) + 1;
     });
 
+    // Get pending incoming bids count
+    const listingIds = userListings.map((l) => l._id.toString());
+    const pendingIncomingBids = await bidsCollection.countDocuments({
+      listingId: { $in: listingIds },
+      status: "pending",
+    });
+
     return NextResponse.json({
       success: true,
       stats: {
@@ -85,12 +104,25 @@ export async function GET() {
         totalBidsReceived,
         totalBidsPlaced: userBids.length,
         totalListings: userListings.length,
+        pendingIncomingBids,
+        totalPurchases: purchaseOrders.length,
+        totalSpent: purchaseOrders.reduce((sum, o) => sum + (o.amount || 0), 0),
       },
       recentListings: recentListings.map((l) => ({
         ...l,
         _id: l._id.toString(),
       })),
       recentBids: enrichedBids,
+      recentPurchases: purchaseOrders.slice(0, 5).map((o) => ({
+        ...o,
+        _id: o._id.toString(),
+        otherPartyName: o.sellerName || "Unknown Seller",
+      })),
+      recentSales: salesOrders.slice(0, 5).map((o) => ({
+        ...o,
+        _id: o._id.toString(),
+        otherPartyName: o.buyerName || "Unknown Buyer",
+      })),
       categoryStats,
     });
   } catch (error) {

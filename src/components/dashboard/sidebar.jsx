@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import { formatDistanceToNow } from "date-fns";
+import { useNotifications } from "@/hooks/useNotifications";
 import {
   LayoutDashboard,
   Package,
@@ -18,6 +20,10 @@ import {
   ChevronRight,
   User,
   Bell,
+  Home,
+  CheckCircle,
+  XCircle,
+  ShoppingBag,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -44,7 +50,6 @@ const sidebarLinks = [
     title: "My Listings",
     href: "/dashboard/my-listings",
     icon: Package,
-    badge: null,
   },
   {
     title: "Create Listing",
@@ -55,13 +60,11 @@ const sidebarLinks = [
     title: "My Bids",
     href: "/dashboard/bids",
     icon: Gavel,
-    badge: null,
   },
   {
     title: "Messages",
     href: "/dashboard/messages",
     icon: MessageSquare,
-    badge: 3,
   },
   {
     title: "Wishlist",
@@ -75,8 +78,27 @@ const sidebarLinks = [
   },
 ];
 
+const getNotificationIcon = (type) => {
+  switch (type) {
+    case "bid":
+      return <Gavel className="h-4 w-4" />;
+    case "message":
+      return <MessageSquare className="h-4 w-4" />;
+    case "accepted":
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case "rejected":
+      return <XCircle className="h-4 w-4 text-red-500" />;
+    case "sale":
+    case "purchase":
+      return <ShoppingBag className="h-4 w-4" />;
+    default:
+      return <Bell className="h-4 w-4" />;
+  }
+};
+
 function SidebarContent({ pathname, onLinkClick }) {
   const { data: session } = useSession();
+  const { notifications, unreadCount, isLoading } = useNotifications();
 
   return (
     <div className="flex h-full flex-col">
@@ -159,6 +181,7 @@ function DashboardHeader() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { notifications, unreadCount, isLoading } = useNotifications();
 
   // Get current page title
   const currentPage = sidebarLinks.find(
@@ -192,15 +215,84 @@ function DashboardHeader() {
 
       {/* Right Side */}
       <div className="flex items-center gap-2">
+        <Button asChild variant="ghost" size="icon">
+          <Link href="/">
+            <Home className="h-5 w-5" />
+          </Link>
+        </Button>
         <ThemeToggle />
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
-            2
-          </span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80">
+            <div className="px-3 py-2 border-b">
+              <p className="font-semibold">Notifications</p>
+              <p className="text-xs text-muted-foreground">
+                {unreadCount > 0 
+                  ? `You have ${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}`
+                  : "Stay updated with your activity"
+                }
+              </p>
+            </div>
+            <div className="max-h-[300px] overflow-y-auto p-2">
+              {isLoading ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Loading notifications...
+                </p>
+              ) : notifications.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No notifications yet
+                </p>
+              ) : (
+                notifications.slice(0, 5).map((notification) => (
+                  <DropdownMenuItem
+                    key={notification._id}
+                    className={`flex gap-3 items-start p-3 cursor-pointer ${
+                      !notification.read ? "bg-primary/5" : ""
+                    }`}
+                    asChild
+                  >
+                    <Link href="/dashboard/notifications">
+                      <div className="mt-0.5">
+                        {getNotificationIcon(notification.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="font-medium text-sm">{notification.title}</p>
+                          {!notification.read && (
+                            <Badge variant="destructive" className="text-[10px] px-1 py-0">New</Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                        </p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                ))
+              )}
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild className="cursor-pointer">
+              <Link href="/dashboard/notifications" className="text-center text-sm text-primary w-full">
+                View all notifications
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* User Menu */}
         <DropdownMenu>

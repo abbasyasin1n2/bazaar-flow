@@ -148,8 +148,7 @@ export function ImageUpload({ images = [], onChange, maxImages = MAX_IMAGES_PER_
               <Image
                 src={image.url}
                 alt={`Upload ${index + 1}`}
-                fill
-                className="object-cover"
+                fill                sizes="150px"                className="object-cover"
               />
               
               {/* First image badge */}

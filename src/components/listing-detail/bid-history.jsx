@@ -1,12 +1,12 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { User, Trophy, Clock } from "lucide-react";
+import { User, Trophy, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formatCurrency } from "@/lib/constants";
+import { formatCurrency, BID_STATUS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 export function BidHistory({ bids = [], currentUserId }) {
@@ -95,9 +95,19 @@ export function BidHistory({ bids = [], currentUserId }) {
                     )}>
                       {formatCurrency(bid.amount)}
                     </span>
-                    {isTopBid && (
+                    {bid.status === BID_STATUS.ACCEPTED ? (
+                      <p className="text-xs text-green-600 flex items-center justify-end gap-1">
+                        <CheckCircle className="h-3 w-3" />
+                        Accepted
+                      </p>
+                    ) : bid.status === BID_STATUS.REJECTED ? (
+                      <p className="text-xs text-destructive flex items-center justify-end gap-1">
+                        <XCircle className="h-3 w-3" />
+                        Rejected
+                      </p>
+                    ) : isTopBid ? (
                       <p className="text-xs text-primary">Highest bid</p>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               );

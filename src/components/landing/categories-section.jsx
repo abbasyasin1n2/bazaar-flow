@@ -4,6 +4,32 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CATEGORIES } from "@/lib/constants";
+import {
+  Laptop,
+  Shirt,
+  Home,
+  Car,
+  Palette,
+  Dumbbell,
+  BookOpen,
+  Gamepad2,
+  Gem,
+  Package,
+} from "lucide-react";
+
+// Map icon names to components
+const iconMap = {
+  Laptop,
+  Shirt,
+  Home,
+  Car,
+  Palette,
+  Dumbbell,
+  BookOpen,
+  Gamepad2,
+  Gem,
+  Package,
+};
 
 export function CategoriesSection() {
   return (
@@ -28,32 +54,35 @@ export function CategoriesSection() {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {CATEGORIES.map((category, index) => (
-            <motion.div
-              key={category.value}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-            >
-              <Link href={`/listings?category=${category.value}`}>
-                <Card className="h-full hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group">
-                  <CardContent className="p-6 text-center">
-                    <motion.span 
-                      className="text-4xl block mb-3"
-                      whileHover={{ scale: 1.2, rotate: [0, -10, 10, 0] }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {category.icon}
-                    </motion.span>
-                    <h3 className="font-medium group-hover:text-primary transition-colors">
-                      {category.label}
-                    </h3>
-                  </CardContent>
-                </Card>
-              </Link>
-            </motion.div>
-          ))}
+          {CATEGORIES.map((category, index) => {
+            const IconComponent = iconMap[category.icon] || Package;
+            return (
+              <motion.div
+                key={category.value}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <Link href={`/listings?category=${category.value}`}>
+                  <Card className="h-full hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group">
+                    <CardContent className="p-6 text-center">
+                      <motion.div
+                        className="mb-3 flex justify-center"
+                        whileHover={{ scale: 1.2 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <IconComponent className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </motion.div>
+                      <h3 className="font-medium group-hover:text-primary transition-colors">
+                        {category.label}
+                      </h3>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
