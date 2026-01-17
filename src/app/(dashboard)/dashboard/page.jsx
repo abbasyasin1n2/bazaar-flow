@@ -1,197 +1,223 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { Package, Gavel, DollarSign, Eye, PlusCircle, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
+import {
+  StatsCard,
+  EarningsChart,
+  BidActivityChart,
+  CategoryPieChart,
+  RecentListingsTable,
+  RecentBidsTable,
+} from "@/components/dashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ThemeToggle } from "@/components/shared";
-import { useSweetAlert } from "@/hooks";
-import { getInitials } from "@/lib/utils";
-import Link from "next/link";
-import { 
-  LogOut, 
-  Package, 
-  Gavel, 
-  MessageSquare, 
-  PlusCircle,
-  Home,
-  User,
-  CheckCircle
-} from "lucide-react";
+import { formatCurrency } from "@/lib/constants";
+
+function EmptyState({ title, description, actionLabel, actionHref }) {
+  return (
+    <Card className="border-dashed">
+      <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
+          <Package className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h3 className="font-semibold text-lg mb-2">{title}</h3>
+        <p className="text-muted-foreground text-sm mb-4 max-w-sm">{description}</p>
+        {actionLabel && actionHref && (
+          <Button asChild>
+            <Link href={actionHref}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              {actionLabel}
+            </Link>
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const { showConfirm } = useSweetAlert();
+  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState(null);
 
-  const handleSignOut = async () => {
-    const confirmed = await showConfirm(
-      "Sign Out",
-      "Are you sure you want to sign out?",
-      "Sign Out"
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await fetch("/api/dashboard/stats");
+        const data = await response.json();
+        if (data.success) {
+          setDashboardData(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
-    if (confirmed) {
-      signOut({ callbackUrl: "/" });
-    }
+  }
+
+  const stats = dashboardData?.stats || {
+    totalEarnings: 0,
+    activeListings: 0,
+    totalBidsReceived: 0,
+    totalBidsPlaced: 0,
   };
 
-  const quickActions = [
-    {
-      title: "My Listings",
-      description: "Manage your listed items",
-      icon: Package,
-      href: "/my-listings",
-      color: "text-blue-500",
-    },
-    {
-      title: "My Bids",
-      description: "Track your placed bids",
-      icon: Gavel,
-      href: "/my-bids",
-      color: "text-green-500",
-    },
-    {
-      title: "Messages",
-      description: "View conversations",
-      icon: MessageSquare,
-      href: "/messages",
-      color: "text-purple-500",
-    },
-    {
-      title: "Create Listing",
-      description: "List a new item",
-      icon: PlusCircle,
-      href: "/create-listing",
-      color: "text-orange-500",
-    },
-  ];
+  const hasListings = stats.totalListings > 0;
+  const hasBids = stats.totalBidsPlaced > 0;
+  const hasActivity = hasListings || hasBids;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/">
-            <h1 className="text-2xl font-bold">🛒 BazaarFlow</h1>
-          </Link>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/listings">
-                <Home className="h-4 w-4 mr-2" />
-                Browse
-              </Link>
-            </Button>
-            <Button variant="destructive" size="sm" onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      {/* Welcome Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col gap-1"
+      >
+        <h2 className="text-2xl font-bold tracking-tight">
+          Welcome back, {session?.user?.name?.split(" ")[0] || "User"}! 👋
+        </h2>
+        <p className="text-muted-foreground">
+          {hasActivity 
+            ? "Here's what's happening with your marketplace activity."
+            : "Get started by creating your first listing or browsing the marketplace."}
+        </p>
+      </motion.div>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {/* Welcome Section */}
+      {/* Stats Cards */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
+        <StatsCard
+          title="Total Earnings"
+          value={formatCurrency(stats.totalEarnings)}
+          icon={DollarSign}
+          trend={stats.totalEarnings > 0 ? "up" : "neutral"}
+          description={stats.totalEarnings > 0 ? "from sales" : "no sales yet"}
+        />
+        <StatsCard
+          title="Active Listings"
+          value={stats.activeListings}
+          icon={Package}
+          trend={stats.activeListings > 0 ? "up" : "neutral"}
+          description={stats.activeListings > 0 ? "live now" : "create your first"}
+        />
+        <StatsCard
+          title="Bids Received"
+          value={stats.totalBidsReceived}
+          icon={Gavel}
+          trend={stats.totalBidsReceived > 0 ? "up" : "neutral"}
+          description="on your listings"
+        />
+        <StatsCard
+          title="Bids Placed"
+          value={stats.totalBidsPlaced}
+          icon={Eye}
+          trend={stats.totalBidsPlaced > 0 ? "up" : "neutral"}
+          description="on other items"
+        />
+      </motion.div>
+
+      {/* Empty State or Charts */}
+      {!hasActivity ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8"
+          transition={{ delay: 0.2 }}
+          className="grid gap-4 md:grid-cols-2"
         >
-          <Card>
-            <CardContent className="flex items-center gap-6 p-6">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src={session?.user?.image} />
-                <AvatarFallback className="text-2xl">
-                  {getInitials(session?.user?.name)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h2 className="text-2xl font-bold">
-                  Welcome back, {session?.user?.name?.split(" ")[0]}! 👋
-                </h2>
-                <p className="text-muted-foreground">{session?.user?.email}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <EmptyState
+            title="No Listings Yet"
+            description="Start selling by creating your first listing. It only takes a few minutes!"
+            actionLabel="Create Listing"
+            actionHref="/dashboard/create-listing"
+          />
+          <EmptyState
+            title="No Bids Yet"
+            description="Browse the marketplace and place bids on items you're interested in."
+            actionLabel="Browse Listings"
+            actionHref="/listings"
+          />
         </motion.div>
+      ) : (
+        <>
+          {/* Charts Row */}
+          {hasListings && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="grid gap-4 lg:grid-cols-3"
+            >
+              <EarningsChart />
+              <CategoryPieChart 
+                data={dashboardData?.categoryStats ? {
+                  labels: Object.keys(dashboardData.categoryStats),
+                  series: Object.values(dashboardData.categoryStats),
+                } : undefined}
+              />
+            </motion.div>
+          )}
 
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="mb-8"
-        >
-          <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickActions.map((action, index) => (
-              <motion.div
-                key={action.href}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.1 + index * 0.1 }}
-              >
-                <Link href={action.href}>
-                  <Card className="h-full hover:border-primary/50 hover:shadow-md transition-all cursor-pointer group">
-                    <CardHeader className="pb-2">
-                      <action.icon className={`h-8 w-8 ${action.color} group-hover:scale-110 transition-transform`} />
-                    </CardHeader>
-                    <CardContent>
-                      <CardTitle className="text-lg">{action.title}</CardTitle>
-                      <CardDescription>{action.description}</CardDescription>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+          {/* Bid Activity Chart */}
+          {(stats.totalBidsReceived > 0 || stats.totalBidsPlaced > 0) && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <BidActivityChart />
+            </motion.div>
+          )}
 
-        {/* Auth Success Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <Card className="border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-900">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-400">
-                <CheckCircle className="h-5 w-5" />
-                Step 2: Authentication Complete!
-              </CardTitle>
-              <CardDescription>
-                You are successfully logged in. This confirms the auth system is working.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  NextAuth.js with credentials provider
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  User registration with bcrypt password hashing
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  Protected route middleware
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  Session management with JWT
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  Login/Register pages with animations
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </main>
+          {/* Tables Row */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="grid gap-4 lg:grid-cols-2"
+          >
+            {hasListings ? (
+              <RecentListingsTable listings={dashboardData?.recentListings || []} />
+            ) : (
+              <EmptyState
+                title="No Listings Yet"
+                description="Create your first listing to start selling!"
+                actionLabel="Create Listing"
+                actionHref="/dashboard/create-listing"
+              />
+            )}
+            {hasBids ? (
+              <RecentBidsTable bids={dashboardData?.recentBids || []} />
+            ) : (
+              <EmptyState
+                title="No Bids Yet"
+                description="Browse listings and place bids on items you want!"
+                actionLabel="Browse Listings"
+                actionHref="/listings"
+              />
+            )}
+          </motion.div>
+        </>
+      )}
     </div>
   );
 }
